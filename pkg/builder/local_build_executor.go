@@ -2,6 +2,7 @@ package builder
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -274,6 +275,13 @@ func (be *localBuildExecutor) Execute(ctx context.Context, filePool re_filesyste
 	for _, environmentVariable := range command.EnvironmentVariables {
 		environmentVariables[environmentVariable.Name] = environmentVariable.Value
 	}
+	// Leak information about the test action via environment variables
+	environmentVariables["BB_ACTION_ID"] = fmt.Sprintf("%v", request.ActionDigest.GetHash())
+	environmentVariables["BB_ACTION_ID_SIZE"] = fmt.Sprintf("%v", request.ActionDigest.GetSizeBytes())
+	environmentVariables["BB_INPUT_ROOT_ID"] = fmt.Sprintf("%v", action.InputRootDigest.GetHash())
+	environmentVariables["BB_INPUT_ROOT_ID_SIZE"] = fmt.Sprintf("%v", action.InputRootDigest.GetSizeBytes())
+	environmentVariables["BB_INSTANCE"] = fmt.Sprintf("%v", digestFunction.GetInstanceName())
+	environmentVariables["BB_TEST_ROOT"] = fmt.Sprintf("cas/%s/blobs/sha256/directory/%s-%d/", digestFunction.GetInstanceName(), action.InputRootDigest.GetHash(), action.InputRootDigest.GetSizeBytes())
 
 	// Invoke the command.
 	ctxWithTimeout, cancelTimeout := be.clock.NewContextWithTimeout(ctxWithIOError, executionTimeout)
