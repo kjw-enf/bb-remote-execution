@@ -1,5 +1,3 @@
-# container.bzl imported from
-# https://github.com/buildbarn/bb-storage/blob/ff8c80c6eb4c844b4b79f4f015babc10addc1139/tools/container.bzl#L4
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_push")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
@@ -47,10 +45,28 @@ def multiarch_go_image(name, binary):
         images = images,
     )
 
-def container_push_official(name, image, component):
+# https://console.cloud.google.com/artifacts?project=enfabrica-container-images
+def container_push_dev(name, image, component):
     oci_push(
-        name = name,
+        name = name + "_dev",
         image = image,
-        repository = "ghcr.io/buildbarn/" + component,
+        repository = "us-docker.pkg.dev/enfabrica-container-images/infra-dev/buildbarn/" + component,
         remote_tags = "@com_github_buildbarn_bb_storage//tools:stamped_tags",
     )
+
+def container_push_staging(name, image, component):
+    oci_push(
+        name = name + "_staging",
+        image = image,
+        repository = "us-docker.pkg.dev/enfabrica-container-images/infra-staging/buildbarn/" + component,
+        remote_tags = "@com_github_buildbarn_bb_storage//tools:stamped_tags",
+    )
+
+def container_push_prod(name, image, component):
+    oci_push(
+        name = name + "_prod",
+        image = image,
+        repository = "us-docker.pkg.dev/enfabrica-container-images/infra-prod/buildbarn/" + component,
+        remote_tags = "@com_github_buildbarn_bb_storage//tools:stamped_tags",
+    )
+
