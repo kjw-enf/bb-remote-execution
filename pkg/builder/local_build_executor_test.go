@@ -432,14 +432,21 @@ func TestLocalBuildExecutorOutputSymlinkReadingFailure(t *testing.T) {
 	buildDirectory.EXPECT().Mkdir(path.MustNewComponent("server_logs"), os.FileMode(0o777))
 	runner := mock.NewMockRunnerClient(ctrl)
 	runner.EXPECT().Run(gomock.Any(), &runner_pb.RunRequest{
-		Arguments:            []string{"touch", "foo"},
-		EnvironmentVariables: map[string]string{"PATH": "/bin:/usr/bin"},
-		WorkingDirectory:     "",
-		StdoutPath:           "stdout",
-		StderrPath:           "stderr",
-		InputRootDirectory:   "root",
-		TemporaryDirectory:   "tmp",
-		ServerLogsDirectory:  "server_logs",
+		Arguments: []string{"touch", "foo"},
+		EnvironmentVariables: map[string]string{"PATH": "/bin:/usr/bin",
+			"BB_ACTION_ID":          "5555555555555555555555555555555555555555555555555555555555555555",
+			"BB_ACTION_ID_SIZE":     "7",
+			"BB_INPUT_ROOT_ID":      "7777777777777777777777777777777777777777777777777777777777777777",
+			"BB_INPUT_ROOT_ID_SIZE": "42",
+			"BB_INSTANCE":           "nintendo64",
+			"BB_TEST_ROOT":          "cas/nintendo64/blobs/sha256/directory/7777777777777777777777777777777777777777777777777777777777777777-42/",
+		},
+		WorkingDirectory:    "",
+		StdoutPath:          "stdout",
+		StderrPath:          "stderr",
+		InputRootDirectory:  "root",
+		TemporaryDirectory:  "tmp",
+		ServerLogsDirectory: "server_logs",
 	}).Return(&runner_pb.RunResponse{
 		ExitCode: 0,
 	}, nil)
@@ -663,6 +670,12 @@ func TestLocalBuildExecutorSuccess(t *testing.T) {
 		},
 		EnvironmentVariables: map[string]string{
 			"BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN": "1",
+			"BB_ACTION_ID":                      "0000000000000000000000000000000000000000000000000000000000000001",
+			"BB_ACTION_ID_SIZE":                 "123",
+			"BB_INPUT_ROOT_ID":                  "0000000000000000000000000000000000000000000000000000000000000003",
+			"BB_INPUT_ROOT_ID_SIZE":             "345",
+			"BB_INSTANCE":                       "ubuntu1804",
+			"BB_TEST_ROOT":                      "cas/ubuntu1804/blobs/sha256/directory/0000000000000000000000000000000000000000000000000000000000000003-345/",
 			"PATH":                              "/bin:/usr/bin",
 			"PWD":                               "/proc/self/cwd",
 			"TEST_VAR":                          "123",
@@ -869,14 +882,21 @@ func TestLocalBuildExecutorInputRootIOFailureDuringExecution(t *testing.T) {
 	// propagated to the response.
 	runner := mock.NewMockRunnerClient(ctrl)
 	runner.EXPECT().Run(gomock.Any(), &runner_pb.RunRequest{
-		Arguments:            []string{"clang"},
-		EnvironmentVariables: map[string]string{},
-		WorkingDirectory:     "",
-		StdoutPath:           "stdout",
-		StderrPath:           "stderr",
-		InputRootDirectory:   "root",
-		TemporaryDirectory:   "tmp",
-		ServerLogsDirectory:  "server_logs",
+		Arguments: []string{"clang"},
+		EnvironmentVariables: map[string]string{
+			"BB_ACTION_ID":          "0000000000000000000000000000000000000000000000000000000000000001",
+			"BB_ACTION_ID_SIZE":     "123",
+			"BB_INPUT_ROOT_ID":      "0000000000000000000000000000000000000000000000000000000000000003",
+			"BB_INPUT_ROOT_ID_SIZE": "345",
+			"BB_INSTANCE":           "ubuntu1804",
+			"BB_TEST_ROOT":          "cas/ubuntu1804/blobs/sha256/directory/0000000000000000000000000000000000000000000000000000000000000003-345/",
+		},
+		WorkingDirectory:    "",
+		StdoutPath:          "stdout",
+		StderrPath:          "stderr",
+		InputRootDirectory:  "root",
+		TemporaryDirectory:  "tmp",
+		ServerLogsDirectory: "server_logs",
 	}).DoAndReturn(func(ctx context.Context, request *runner_pb.RunRequest, opts ...grpc.CallOption) (*runner_pb.RunResponse, error) {
 		errorLogger.Log(status.Error(codes.FailedPrecondition, "Blob not found"))
 		<-ctx.Done()
@@ -993,14 +1013,21 @@ func TestLocalBuildExecutorTimeoutDuringExecution(t *testing.T) {
 	// zero seconds. This should cause an immediate build failure.
 	runner := mock.NewMockRunnerClient(ctrl)
 	runner.EXPECT().Run(gomock.Any(), &runner_pb.RunRequest{
-		Arguments:            []string{"clang"},
-		EnvironmentVariables: map[string]string{},
-		WorkingDirectory:     "",
-		StdoutPath:           "stdout",
-		StderrPath:           "stderr",
-		InputRootDirectory:   "root",
-		TemporaryDirectory:   "tmp",
-		ServerLogsDirectory:  "server_logs",
+		Arguments: []string{"clang"},
+		EnvironmentVariables: map[string]string{
+			"BB_ACTION_ID":          "0000000000000000000000000000000000000000000000000000000000000001",
+			"BB_ACTION_ID_SIZE":     "123",
+			"BB_INPUT_ROOT_ID":      "0000000000000000000000000000000000000000000000000000000000000003",
+			"BB_INPUT_ROOT_ID_SIZE": "345",
+			"BB_INSTANCE":           "ubuntu1804",
+			"BB_TEST_ROOT":          "cas/ubuntu1804/blobs/sha256/directory/0000000000000000000000000000000000000000000000000000000000000003-345/",
+		},
+		WorkingDirectory:    "",
+		StdoutPath:          "stdout",
+		StderrPath:          "stderr",
+		InputRootDirectory:  "root",
+		TemporaryDirectory:  "tmp",
+		ServerLogsDirectory: "server_logs",
 	}).DoAndReturn(func(ctx context.Context, request *runner_pb.RunRequest, opts ...grpc.CallOption) (*runner_pb.RunResponse, error) {
 		<-ctx.Done()
 		return nil, util.StatusFromContext(ctx)
