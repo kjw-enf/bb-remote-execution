@@ -28,7 +28,8 @@ func (m *nfsv4Mount) mount(terminationGroup program.Group, rpcServer *rpcserver.
 	osConfiguration := linuxConfiguration.Linux
 
 	// Expose the NFSv4 server on a TCP socket.
-	sock, err := net.Listen("tcp", "localhost:")
+	//sock, err := net.Listen("tcp", "localhost:")
+	sock, err := net.Listen("tcp", ":")
 	if err != nil {
 		return util.StatusWrap(err, "Failed to create listening socket for NFSv4 server")
 	}
@@ -62,7 +63,8 @@ func (m *nfsv4Mount) mount(terminationGroup program.Group, rpcServer *rpcserver.
 		/* data = */ strings.Join(
 			append(
 				[]string{
-					"addr=" + listenAddressPort.Addr().String(),
+					//"addr=" + listenAddressPort.Addr().String(),
+					"addr=127.0.0.1",
 					fmt.Sprintf("port=%d", listenAddressPort.Port()),
 				},
 				osConfiguration.MountOptions...,
